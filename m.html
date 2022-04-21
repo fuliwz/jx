@@ -1,12 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<div class="container">
-    <video controls crossorigin playsinline></video>
-</div>
-<link rel="stylesheet" href="//cdn.plyr.io/3.4.7/plyr.css">
-<script src="//cdn.plyr.io/3.4.7/plyr.js"></script>
-<script src="//cdn.jsdelivr.net/npm/cdnbye@latest"></script>
+
+<script src="//cdn.jsdelivr.net/npm/hls.js@0.14.17"></script>
+<script src="//cdn.jsdelivr.net/npm/cdnbye@latest/dist/hlsjs-p2p-engine.min.js"></script>
+<video id="video" controls></video>
+<p id="version"></p>
+<h3>download info:</h3>
+<p id="info"></p>
+<table id="table-body">
+    <tbody ></tbody>
+</table>
 <script>
+	
      function getUrlParam(name) {
 				var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
 				var r = window.location.search.substr(1).match(reg); //匹配目标参数
@@ -14,44 +17,53 @@
 				return null; //返回参数值
 			};
 	    var url = getUrlParam('url');
-    document.querySelector('#version').innerText = `hls.js version: ${Hls.version}  cdnbye version: ${Hls.engineVersion}`;
-    document.addEventListener('DOMContentLoaded', () => {
-        var source = url;
-        var video = document.querySelector('video');
-
-        // For more options see: https://github.com/sampotts/plyr/#options
-        // captions.update is required for captions to work with hls.js
-        var player = new Plyr(video, {
-            captions: {active: true, update: true, language: 'en'},
-            // autoplay: true,
+    var source = getUrlParam('url');
+    var video = document.getElementById('video');
+    if(Hls.isSupported()) {
+        var hls = new Hls({
+            maxBufferSize: 0,       // Highly recommended setting
+            maxBufferLength: 5,     // Highly recommended setting
+            liveSyncDuration: 30,   // Highly recommended setting
         });
-
-        if (!Hls.isSupported()) {
-            video.src = source;
-        } else {
-            // For more Hls.js options, see https://github.com/dailymotion/hls.js
-            var hls = new Hls({
-                p2pConfig: {
-                    live: true,        // set to false in VOD mode
-                    getStats: function (totalP2PDownloaded, totalP2PUploaded, totalHTTPDownloaded) {
-                        var total = totalHTTPDownloaded + totalP2PDownloaded;
-                        document.querySelector('#info').innerText = `p2p ratio: ${Math.round(totalP2PDownloaded/total*100)}%, saved traffic: ${totalP2PDownloaded}KB, uploaded: ${totalP2PUploaded}KB`;
-                    },
-                    // Other p2pConfig options provided by CDNBye
-                }
+        if (P2PEngine.isSupported()) {
+            var engine = new P2PEngine(hls, {
+                live: true,        // set to false in VOD mode
+                // Other p2pConfig options provided by CDNBye
             });
-            hls.loadSource(source);
-            hls.attachMedia(video);
-            window.hls = hls;
-
-            // Handle changing captions
-            player.on('languagechange', () => {
-                // Caption support is still flaky. See: https://github.com/sampotts/plyr/issues/994
-                setTimeout(() => hls.subtitleTrack = player.currentTrack, 50);
-            });
+            engine.on('stats', function ({totalHTTPDownloaded=0, totalP2PDownloaded=0, totalP2PUploaded=0}) {
+                var total = totalHTTPDownloaded + totalP2PDownloaded;
+                document.querySelector('#info').innerText = `p2p ratio: ${Math.round(totalP2PDownloaded/total*100)}%, saved traffic: ${totalP2PDownloaded}KB`;
+            })
         }
-
-        // Expose player so it can be used from the console
-        window.player = player;
-    });
+        hls.loadSource(source);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED,function(event, data) {
+            video.play();
+        });
+        hls.on(Hls.Events.FRAG_LOADED, (id, data) => {
+            var frag = data.frag;
+            var source = undefined;
+            if (frag.loadByP2P === true) {
+                source = 'P2P';
+            } else {
+                source = 'HTTP';
+            }
+            addToTable(frag.relurl, frag.loaded, source);
+        });
+        document.querySelector('#version').innerText = `hls.js version: ${Hls.version}  cdnbye version: ${P2PEngine.version}`;
+        function addToTable(url, downloaded, source) {
+            var infoStr = `download ${url}(size:${downloaded}B) by ${source}`;
+            document.querySelector('#table-body tbody').innerHTML +=
+                `<tr style="text-align: center">
+                    <td>${infoStr}</td>
+                </tr>`
+        };
+    }
+    // This is using the built-in support of the plain video element, without using hls.js.
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = source;
+        video.addEventListener('loadedmetadata',function() {
+            video.play();
+        });
+    }
 </script>
