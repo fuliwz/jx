@@ -13,9 +13,10 @@
 				if(r != null) return unescape(r[2]);
 				return null; //返回参数值
 			};
+	    var url = getUrlParam('url');
     document.querySelector('#version').innerText = `hls.js version: ${Hls.version}  cdnbye version: ${Hls.engineVersion}`;
     document.addEventListener('DOMContentLoaded', () => {
-        var source = getUrlParam('url');
+        var source = url;
         var video = document.querySelector('video');
 
         // For more options see: https://github.com/sampotts/plyr/#options
