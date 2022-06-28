@@ -1,0 +1,65 @@
+  <meta charset="UTF-8" />
+<link rel="stylesheet" href="https://releases.flowplayer.org/7.2.7/skin/skin.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand:400,700">
+<link rel="stylesheet" type="text/css" href="https://www.cospuri.com/css/style.css" media="screen">
+<script src="https://cdn.cospuri.com/js/jquery-3.3.1.min.js"></script>
+<script src="https://releases.flowplayer.org/7.2.7/commercial/flowplayer.min.js"></script><script src="https://cdn.cospuri.com/js/common.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/cdnbye@latest/dist/hls.light.min.js"></script>
+<!-- body section -->
+<div class="main wide">
+
+    <div class="vid cosplay">
+        <div class="player fp-slim fp-edgy fp-mute" style="background-color: black;">
+            <div class="fp-context-menu fp-menu">
+                <strong>M3U8云解析</strong>
+                <a href="https://91dh.cf" target="_blank">更多精彩视频</a>
+            </div>
+     
+        </div>
+    </div>
+
+
+
+
+
+<script type="text/javascript">
+   function getUrlParam(name) {
+				var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); 
+				var r = window.location.search.substr(1).match(reg); 
+				if(r != null) return unescape(r[2]);
+				return null; 
+			};
+    var url = getUrlParam('url');
+  
+$(function(){
+	var api = flowplayer(".player", {
+		key: '$601538636256020',
+          ratio: 9/16,
+		splash: true,
+		share: false,
+		native_fullscreen: true,
+		bgcolor: '#FFFFF',
+        seekStep: 10,
+		clip: {
+	   sources: [
+                
+                { type: "application/x-mpegurl", src: url},
+            ]
+		},
+		cuepoints: [1]
+	});
+
+	api.on("cuepoint", function(e, api, cuepoint) {
+		
+	});
+    
+  
+    
+    $('.fourK').hover(function(){
+        $('.tooltip').stop().animate({ opacity: 1 }, 150);
+    }, function(){
+        $('.tooltip').stop().animate({ opacity: 0 }, 150);
+    });
+});
+</script>
+
