@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+  <style>
+.vjs-mobile .vjs-volume-menu-button {
+	top: 10px !important;
+	left: 60px !important;
+}
+</style>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@hola.org/hola_player@1.1.4/dist/hola_player.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-hotkeys@0.2.27/videojs.hotkeys.min.js"></script>
+<body>
+ <script type="text/javascript">var vid = window.location.href.split("url=")[1];</script>
+	<div style='position: relative;' class='mb-3'>
+				<video id="player_one" preload="auto" poster=""
+					class="video-js vjs-default-skin vjs-16-9" controls
+					data-setup='{"fluid": true}'>
+				</video>
+				<div id='player-status'
+					style='position: absolute; top: 0; background: rgba(0, 0, 0, 0.5); width: 100%; color: white; text-align: center'>
+					視頻正在加載，請稍後...
+				</div>
+			</div>
+
+  
+ <script>
+			var src = location.hash.substring(1)||"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+			history.replaceState(null, null, ' ');
+			var hola = hola_player({
+				auto_play: true,
+				player: '#player_one',
+				sources: [{
+					  src: vid,
+				}],
+				
+			});
+			player = hola.vjs;
+			player.on("loadeddata",function(){
+				console.log("data loaded");
+				document.querySelector("#player-status").remove();
+			});
+			$("#urlInput").val(src);
+			$("#playBtn").click(function(){
+				location.hash = "#"+$("#urlInput").val();
+				location.reload();
+			});
+		
+			</script>
+</body>
+</html>
