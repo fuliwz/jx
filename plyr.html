@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plyr with HLS.js</title>
+    <!-- 引入 Plyr 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+</head>
+<body>
+
+    <!-- 创建一个 video 元素 -->
+    <video id="player" controls></video>
+
+    <!-- 引入 hls.js 和 Plyr 的 JavaScript 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+ <script type="text/javascript">var vid = window.location.href.split("url=")[1];</script>
+    <script>
+        // 获取视频元素
+        const video = document.getElementById('player');
+        const videoSrc = vid; // 替换为你的 m3u8 文件地址
+
+        // 检查浏览器是否支持 HLS
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc); // 加载 m3u8 流
+            hls.attachMedia(video);   // 将 m3u8 流附加到 video 元素
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                video.play();         // 当 HLS 流准备好后，开始播放
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // 如果浏览器支持 HLS 的原生播放 (例如 Safari)
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function () {
+                video.play();
+            });
+        }
+
+        // 初始化 Plyr
+        const player = new Plyr(video);
+    </script>
+
+</body>
+</html>
